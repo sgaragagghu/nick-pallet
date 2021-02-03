@@ -40,6 +40,20 @@
 //! [`Config`]: ./trait.Config.html
 
 #![cfg_attr(not(feature = "std"), no_std)]
+// something like a macro, the ! means it will apply to this file. Otherwise it will apply to the following block.
+//cfg_attr means that if the first `object` -in this case it is not(feature = `std`)- is true then it will expand to
+//#![no_std]
+//cfg_attr can have more things after the second `object`... with commas. It will just exand each of it.. fir example
+//#![A]
+//#![B]
+//#![C]
+//etc
+//cfg_attr can even be concatenated with another cfg_attr
+//So basically if the std feature is not `enabled` -> not(false) -> true so it exands to no_std
+//std means it will be linked to kinda the `standard library`, otherwise it will be linked to an alternative library which is the core rust library.
+//std is used in normal compilation but when it is used runtime std library is not available and thus it will be compiled with no_std.
+//some functions are not available or different between std and no_std, it means we must be sure it will work in both ways -std and no_std-
+
 
 use sp_std::prelude::*;
 use sp_runtime::{
