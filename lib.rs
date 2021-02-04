@@ -54,16 +54,31 @@
 //std is used in normal compilation but when it is used runtime std library is not available and thus it will be compiled with no_std.
 //some functions are not available or different between std and no_std, it means we must be sure it will work in both ways -std and no_std-
 
-
-use sp_std::prelude::*;
-use sp_runtime::{
-	traits::{StaticLookup, Zero}
+//Example of use: it bsically bind the final object to the complete path(object included)
+// use path::to::object
+// now we can locally write object instead of path::to::object
+/*
+use crate::deeply::nested::{
+    my_first_function,
+    my_second_function,
+    AndATraitType
 };
-use frame_support::{
+
+fn main() {
+    my_first_function();
+}
+*/
+
+use sp_std::prelude::*; // binding all the objects in that path
+use sp_runtime::{
+	traits::{StaticLookup, Zero} //eventualy binding these two objects
+};
+use frame_support::{ //just binding
 	decl_module, decl_event, decl_storage, ensure, decl_error,
 	traits::{Currency, EnsureOrigin, ReservableCurrency, OnUnbalanced, Get},
 };
-use frame_system::ensure_signed;
+use frame_system::ensure_signed; //just binding
+
 
 type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 type NegativeImbalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::NegativeImbalance;
