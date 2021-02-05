@@ -89,27 +89,36 @@ use frame_system::ensure_signed; //just binding
 type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance; //alias
 type NegativeImbalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::NegativeImbalance; //alias
 
+//pub means it is vicible outside of this crate. Otherwise it would be private, if private it is only visible by this crate and its descendants
+//trait defiinition: it is something like a java class definition - then each data type can implement it and be treated as they are the same `object` 
+//even if data types are different. 
+//trait can define functions and methods, types, constants.
+//this part `: frame_system::Config` means that this is a subtrait of : frame_system::Config (also you can call it supertrait)
+//just a specialization of the trait.
 pub trait Config: frame_system::Config {
+// Self refers to current type that implements the trait
+// Trait bounds, exampple: `type OneType: TwoTrait + ThreeTrait` means that the OneType *associated* type must implement both TwoTrait and ThreeTrait traits
+
 	/// The overarching event type.
-	type Event: From<Event<Self>> + Into<<Self as frame_system::Config>::Event>;
+	type Event: From<Event<Self>> + Into<<Self as frame_system::Config>::Event>; // trait bound
 
 	/// The currency trait.
-	type Currency: ReservableCurrency<Self::AccountId>;
+	type Currency: ReservableCurrency<Self::AccountId>; // trait bound
 
 	/// Reservation fee.
-	type ReservationFee: Get<BalanceOf<Self>>;
+	type ReservationFee: Get<BalanceOf<Self>>; // trait bound
 
 	/// What to do with slashed funds.
-	type Slashed: OnUnbalanced<NegativeImbalanceOf<Self>>;
+	type Slashed: OnUnbalanced<NegativeImbalanceOf<Self>>; // trait bound
 
 	/// The origin which may forcibly set or remove a name. Root can always do this.
-	type ForceOrigin: EnsureOrigin<Self::Origin>;
+	type ForceOrigin: EnsureOrigin<Self::Origin>; // trait bound
 
 	/// The minimum length a name may be.
-	type MinLength: Get<usize>;
+	type MinLength: Get<usize>; // trait bound
 
 	/// The maximum length a name may be.
-	type MaxLength: Get<usize>;
+	type MaxLength: Get<usize>; // trait bound
 }
 
 decl_storage! {
