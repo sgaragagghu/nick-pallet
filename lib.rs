@@ -79,9 +79,15 @@ use frame_support::{ //just binding
 };
 use frame_system::ensure_signed; //just binding
 
-
-type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
-type NegativeImbalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::NegativeImbalance;
+// THE FOLLOWING EXPLANATION MAY CONTAIN ERROR SINCE IT'S DIFFICULT TO UNDERSTAND AND NEEDS INFORMATIONS I'LL GET GOING AHEAD READING AND COMMENTING
+// type will create a type ALIAS (NOT A NEW TYPE!)
+// the grammar of 'as' looks something like: expression 'as' type
+// A: <T as Config>::Currency should refer to associated type Currency in the impementation of a trait Config for a type T.
+// B: <T as frame_system::Config>::AccountId should refer to associated type AccountId int the implementation of a trait Config (in frame_system) for a type T.
+// <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance combination of the two, should refer to associated type 
+// Balance in the implementation of a trait B for a type A.
+type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance; //alias
+type NegativeImbalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::NegativeImbalance; //alias
 
 pub trait Config: frame_system::Config {
 	/// The overarching event type.
