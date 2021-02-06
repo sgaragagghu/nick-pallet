@@ -135,8 +135,19 @@ pub trait Config: frame_system::Config {
 	type MaxLength: Get<usize>; // trait bound
 }
 
-decl_storage! {
+decl_storage! { // macro!, macro is a macro because there is the !
+// shoud create an implementation (but in this case it should be impl and not trait...)
+// a concrete type that implements the trait store
+// the type in this case is Module<T: Config> as Nicks which means 
+// Module<T: Config> casted as Nicks
+// <T: Config> .. : Config is a trait constraint that means the type which Module will take must implement that Config trait...
+	//here store items
 	trait Store for Module<T: Config> as Nicks {
+// Type Option represents an optional value: every Option is either Some and contains a value, or None, and does not.
+// It seems here NameOf is declared as something like a function?
+// it should somehow create hash from the key which is AccountId (it should be a type) and the `payload` should be the
+// tuple Vec<u8>, BalanceOf<T>)> (which are both types, well the latter is an alias.)
+// Vec<u8> is pobably a vector of u8 which (should be chars... not true lol)
 		/// The lookup table for names.
 		NameOf: map hasher(twox_64_concat) T::AccountId => Option<(Vec<u8>, BalanceOf<T>)>;
 	}
