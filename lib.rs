@@ -99,24 +99,38 @@ pub trait Config: frame_system::Config {
 // Self refers to current type that implements the trait
 // Trait bounds, exampple: `type OneType: TwoTrait + ThreeTrait` means that the OneType *associated* type must implement both TwoTrait and ThreeTrait traits
 
+// So the Event associated type must implement std::convert::From and std::convert::Into which are
+// both traits used to do value-to-value conversions while consuming the input value (Into is somehow the 'fallback' of From)
 	/// The overarching event type.
 	type Event: From<Event<Self>> + Into<<Self as frame_system::Config>::Event>; // trait bound
 
+// the Currency associated type must implement the trait frame_support::traits::ReservableCurrency
+// A currency where funds can be reserved from the user.
+// PROBABLY IT MEANS WE HAVE TO IMPEMENT SOMETHING? LET'S SEE
 	/// The currency trait.
 	type Currency: ReservableCurrency<Self::AccountId>; // trait bound
 
+//ALPHA
+// the ReservationFee associated type must implement the trait frame_support::traits::Get
+// A trait for querying a single value from a type.
+// It is not required that the value is constant.
+// So afaiu it means ReservationFee must implements a get function
 	/// Reservation fee.
 	type ReservationFee: Get<BalanceOf<Self>>; // trait bound
 
+// the Slashed associated type must implement the trait frame_support::traits::OnUnbalanced
+// Handler for when some currency "account" decreased in balance for some reason.
 	/// What to do with slashed funds.
 	type Slashed: OnUnbalanced<NegativeImbalanceOf<Self>>; // trait bound
 
+// the ForceOrigin associated type must implement the trait frame_support::traits::EnsureOrigin
+// Some sort of check on the origin is performed by this object.
 	/// The origin which may forcibly set or remove a name. Root can always do this.
 	type ForceOrigin: EnsureOrigin<Self::Origin>; // trait bound
-
+//Same as ALPHA
 	/// The minimum length a name may be.
 	type MinLength: Get<usize>; // trait bound
-
+//Same as ALPHA
 	/// The maximum length a name may be.
 	type MaxLength: Get<usize>; // trait bound
 }
