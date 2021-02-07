@@ -135,7 +135,8 @@ pub trait Config: frame_system::Config {
 	type MaxLength: Get<usize>; // trait bound
 }
 
-decl_storage! { // macro!, macro is a macro because there is the !
+// the visibility of Substrate storage items only impacts whether or not other pallets within the runtime will be able to access a storage item.
+decl_storage! { // macro!, macro is a macro because there is the ! - https://substrate.dev/docs/en/knowledgebase/runtime/storage
 // shoud create an implementation (but in this case it should be impl and not trait...)
 // a concrete type that implements the trait store
 // the type in this case is Module<T: Config> as Nicks which means 
@@ -153,8 +154,12 @@ decl_storage! { // macro!, macro is a macro because there is the !
 	}
 }
 
-decl_event!(
-	pub enum Event<T> where AccountId = <T as frame_system::Config>::AccountId, Balance = BalanceOf<T> {
+// To declare an event, use the decl_event! macro. Like any rust enum, Events have names and can optionally carry data with them. 
+// The syntax is slightly different depending on whether the events carry data of primitive types, or generic types from the pallet's configuration trait.
+decl_event!( // https://substrate.dev/recipes/events.html
+	pub enum Event<T> where AccountId = <T as frame_system::Config>::AccountId, Balance = BalanceOf<T> { // where clause can be used to specify type aliasing for more readable code.
+// list of the events
+
 		/// A name was set. \[who\]
 		NameSet(AccountId),
 		/// A name was forcibly set. \[target\]
