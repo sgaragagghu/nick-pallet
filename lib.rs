@@ -82,6 +82,7 @@ use frame_system::ensure_signed; //just binding
 // THE FOLLOWING EXPLANATION MAY CONTAIN ERROR SINCE IT'S DIFFICULT TO UNDERSTAND AND NEEDS INFORMATIONS I'LL GET GOING AHEAD READING AND COMMENTING
 // type will create a type ALIAS (NOT A NEW TYPE!)
 // the grammar of 'as' looks something like: expression 'as' type
+// So T as Config is kinda a cast so T must implement that trait - so it is a trait constrain..
 // A: <T as Config>::Currency should refer to associated type Currency in the impementation of a trait Config for a type T.
 // B: <T as frame_system::Config>::AccountId should refer to associated type AccountId int the implementation of a trait Config (in frame_system) for a type T.
 // <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance combination of the two, should refer to associated type 
@@ -137,8 +138,8 @@ pub trait Config: frame_system::Config {
 
 // the visibility of Substrate storage items only impacts whether or not other pallets within the runtime will be able to access a storage item.
 decl_storage! { // macro!, macro is a macro because there is the ! - https://substrate.dev/docs/en/knowledgebase/runtime/storage
-// shoud create an implementation (but in this case it should be impl and not trait...)
-// a concrete type that implements the trait store
+// FOR keyword in this context shoud create an implementation (but in this case it should be impl and not trait...)
+// a concrete type that implements the trait store ... PROBABLY IS JUST MEANS we are implementing 
 // the type in this case is Module<T: Config> as Nicks which means 
 // Module<T: Config> casted as Nicks
 // <T: Config> .. : Config is a trait constraint that means the type which Module will take must implement that Config trait...
@@ -159,7 +160,37 @@ decl_storage! { // macro!, macro is a macro because there is the ! - https://sub
 // Having a transaction included in a block does not guarantee that the function executed successfully.
 // To verify that functions have executed successfully, emit an event at the bottom of the function body.
 // Events notify the off-chain world of successful state transitions.
+// https://doc.rust-lang.org/book/ch06-01-defining-an-enum.html
+// enum create just something like a SYMBOL, normally... like
+/*
+enum IpAddrKind {
+    V4,
+    V6,
+}
+    let four = IpAddrKind::V4;
+    let six = IpAddrKind::V6;
+IpAddrKind is the type
+now a function eg. called route that can take just IpAddrKind... obviously
+And we can call this function with either variant:
+
+    route(IpAddrKind::V4);
+    route(IpAddrKind::V6);
+then we can attach some variable to wach enum kind like... 
+enum IpAddrKind {
+    V4(String),
+    V6(String),
+}
+instead 
+enum IpAddrKind<T> {
+    V4(T),
+    V6(T),
+}
+means we an call it with whatever data type
+*/
+
 decl_event!( // https://substrate.dev/recipes/events.html
+//this T instead id needed for the trait bound <T as frame_system::Config>::AccountId
+// so basically means T must implement the trait frame_system::Config
 	pub enum Event<T> where AccountId = <T as frame_system::Config>::AccountId, Balance = BalanceOf<T> { // where clause can be used to specify type aliasing for more readable code.
 // list of the events
 
@@ -176,9 +207,15 @@ decl_event!( // https://substrate.dev/recipes/events.html
 	}
 );
 
+// To define error types which a pallet may return in its dispatchable functions. Dispatchable functions return 
+// DispatchResult, with either an Ok(()), or DispatchError containing custom errors defined in this macro.
+
+// So FOR is used to implement a trait into a type basically
+// so Error is implementing the Module trait
+
 decl_error! {
 	/// Error for the nicks module.
-	pub enum Error for Module<T: Config> {
+	pub enum Error for Module<T: Config> { // : Config type constraint
 		/// A name is too short.
 		TooShort,
 		/// A name is too long.
@@ -187,6 +224,11 @@ decl_error! {
 		Unnamed,
 	}
 }
+
+// https://substrate.dev/docs/en/knowledgebase/runtime/macros#decl_module
+// To define dispatchable functions in a pallet
+// The macro declares a Module struct and Call enum type for the containing pallet. 
+// It combines the necessary logics using user-defined dispatchable calls into the two types (modules and types).
 
 decl_module! {
 	/// Nicks module declaration.
