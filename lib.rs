@@ -156,6 +156,9 @@ decl_storage! { // macro!, macro is a macro because there is the ! - https://sub
 
 // To declare an event, use the decl_event! macro. Like any rust enum, Events have names and can optionally carry data with them. 
 // The syntax is slightly different depending on whether the events carry data of primitive types, or generic types from the pallet's configuration trait.
+// Having a transaction included in a block does not guarantee that the function executed successfully.
+// To verify that functions have executed successfully, emit an event at the bottom of the function body.
+// Events notify the off-chain world of successful state transitions.
 decl_event!( // https://substrate.dev/recipes/events.html
 	pub enum Event<T> where AccountId = <T as frame_system::Config>::AccountId, Balance = BalanceOf<T> { // where clause can be used to specify type aliasing for more readable code.
 // list of the events
