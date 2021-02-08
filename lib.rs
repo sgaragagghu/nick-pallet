@@ -235,6 +235,9 @@ decl_module! {
 	pub struct Module<T: Config> for enum Call where origin: T::Origin { // probably this T wrap the caller... so Origin is the caller basically...?
 		type Error = Error<T>;
 
+//  Default::default();
+//  Sometimes, you want to fall back to some kind of default value, and don't particularly care what it is.
+
 		fn deposit_event() = default;
 
 		/// Reservation fee.
@@ -318,16 +321,18 @@ In this case it's like *
 											      // NameOf is the hashmap function we've defined 
 											      // in the decl_starage! block. So deposit is the deposited
 											      // balance and _ in the nick (we don't care about which is it)
+			// RawEvent::NameChanged(sender.clone())
+			// TODO what Self::deposit_event is ???
 				Self::deposit_event(RawEvent::NameChanged(sender.clone()));
-				deposit
+				deposit // return the deposited amount
 			} else {
-				let deposit = T::ReservationFee::get();
+				let deposit = T::ReservationFee::get(); // in this case te deposited amount is must be defined cause it isnt 
 				T::Currency::reserve(&sender, deposit.clone())?;
 				Self::deposit_event(RawEvent::NameSet(sender.clone()));
 				deposit
 			};
 
-			<NameOf<T>>::insert(&sender, (name, deposit));
+			<NameOf<T>>::insert(&sender, (name, deposit)); // inserting...
 		}
 
 		/// Clear an account's name and return the deposit. Fails if the account was not named.
