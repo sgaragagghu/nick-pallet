@@ -232,7 +232,7 @@ decl_error! {
 
 decl_module! {
 	/// Nicks module declaration.
-	pub struct Module<T: Config> for enum Call where origin: T::Origin {
+	pub struct Module<T: Config> for enum Call where origin: T::Origin { // probably this T wrap the caller... so Origin is the caller basically...?
 		type Error = Error<T>;
 
 		fn deposit_event() = default;
@@ -295,15 +295,29 @@ if let ("Bacon", b) = dish {
     // This block is evaluated instead.
     println!("No bacon will be served");
 }
-/---/
+/---/ Example to understand None and Some
 pub enum Option<T> {
     None,
     Some(T),
 }
  Afaiu: Some is needed to avoid None (something like to avoid NULL... )
- after is let there must be a pattern equal to something...
+ after is let there must be a pattern equal to an expression...
+/---/
+Example to understand match and _
+ let some_u8_value = Some(0u8);
+ match some_u8_value { <- basically like a switch
+      Some(3) => println!("three"),
+      _ => (), <- default
+ }
+/---/ Example about _
+It means "Rust compiler, infer what goes there basically.
+In this case it's like *
 */
-			let deposit = if let Some((_, deposit)) = <NameOf<T>>::get(&sender) {
+			let deposit = if let Some((_, deposit)) = <NameOf<T>>::get(&sender) { // if we had already a nick set, so 
+											      // we shuld change it instead of set a new one
+											      // NameOf is the hashmap function we've defined 
+											      // in the decl_starage! block. So deposit is the deposited
+											      // balance and _ in the nick (we don't care about which is it)
 				Self::deposit_event(RawEvent::NameChanged(sender.clone()));
 				deposit
 			} else {
