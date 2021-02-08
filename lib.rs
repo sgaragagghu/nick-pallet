@@ -263,12 +263,46 @@ decl_module! {
 		/// - One event.
 		/// # </weight>
 		#[weight = 50_000_000]
-		fn set_name(origin, name: Vec<u8>) {
+// Functions are declared using the fn keyword. Its arguments are type annotated, just like variables, 
+// and, if the function returns a value, the return type must be specified after an arrow ->.
+// The final expression in the function will be used as return value. Alternatively, the return statement can be used to 
+// return a value earlier from within the function, even from inside loops or if statements.
+
+		fn set_name(origin, name: Vec<u8>) { // So no return..
+// The primary use for the let keyword is in let statements, which are used to introduce a new set of variables into the current scope
+// we can constraint the type ex: 'let thing1: i32 = 100;'
+// otherwise it will be understood by the compiler... 
+
+// The ? is shorthand for the entire match statements we wrote earlier. In other words, 
+// ? applies to a Result value, and if it was an Ok, it unwraps it and gives the inner value. 
+// If it was an Err, it returns from the function you're currently in.
 			let sender = ensure_signed(origin)?;
 
-			ensure!(name.len() >= T::MinLength::get(), Error::<T>::TooShort);
+// The bail! macro returns an error immediately, based on a format string. The ensure! macro additionally takes a conditional, 
+// and returns the error only if that conditional is false. 
+// You can think of bail! and ensure! as being analogous to panic! and assert!, but throwing errors instead of panicking.
+
+			ensure!(name.len() >= T::MinLength::get(), Error::<T>::TooShort); // Error::<T>::TooShort defined in decl_error! 
 			ensure!(name.len() <= T::MaxLength::get(), Error::<T>::TooLong);
 
+// https://doc.rust-lang.org/reference/expressions/if-expr.html
+// example
+// let dish = ("Ham", "Eggs");
+/* this body will be skipped because the pattern is refuted
+if let ("Bacon", b) = dish {
+    println!("Bacon is served with {}", b);
+} else {
+    // This block is evaluated instead.
+    println!("No bacon will be served");
+}
+/---/
+pub enum Option<T> {
+    None,
+    Some(T),
+}
+ Afaiu: Some is needed to avoid None (something like to avoid NULL... )
+ after is let there must be a pattern equal to something...
+*/
 			let deposit = if let Some((_, deposit)) = <NameOf<T>>::get(&sender) {
 				Self::deposit_event(RawEvent::NameChanged(sender.clone()));
 				deposit
