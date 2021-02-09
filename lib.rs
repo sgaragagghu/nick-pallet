@@ -232,13 +232,13 @@ decl_error! {
 
 decl_module! {
 	/// Nicks module declaration.
-	pub struct Module<T: Config> for enum Call where origin: T::Origin { // probably this T wrap the caller... so Origin is the caller basically...?
-		type Error = Error<T>;
+	pub struct Module<T: Config> for enum Call where origin: T::Origin { // probably this T wrap the call... so Origin is the caller basically...?
+		type Error = Error<T>; // alias. Error is a trait anyway
 
 //  Default::default();
 //  Sometimes, you want to fall back to some kind of default value, and don't particularly care what it is.
 
-		fn deposit_event() = default;
+		fn deposit_event() = default; // probably it's just the default implementation of this function.
 
 		/// Reservation fee.
 		const ReservationFee: BalanceOf<T> = T::ReservationFee::get();
@@ -349,9 +349,14 @@ In this case it's like *
 		fn clear_name(origin) {
 			let sender = ensure_signed(origin)?;
 
-			let deposit = <NameOf<T>>::take(&sender).ok_or(Error::<T>::Unnamed)?.1;
+// pub fn ok_or<E>(self, err: E) -> Result<T, E>
+// Transforms the Option<T> into a Result<T, E>, mapping Some(v) to Ok(v) and None to Err(err).
+// Result is most prominently used for I/O. 
+// T in this case is something gave by substrate which contain every information about caller and extrinsic
+// We defined the Unnamed error in decl_error!
+			let deposit = <NameOf<T>>::take(&sender).ok_or(Error::<T>::Unnamed)?.1; // TODO print this shit out to understand .1 .0 etc
 
-			let _ = T::Currency::unreserve(&sender, deposit.clone());
+			let _ = T::Currency::unreserve(&sender, deposit.clone()); // _ to suppress the must use warning
 
 			Self::deposit_event(RawEvent::NameCleared(sender, deposit));
 		}
@@ -370,13 +375,22 @@ In this case it's like *
 		/// - One event.
 		/// # </weight>
 		#[weight = 70_000_000]
-		fn kill_name(origin, target: <T::Lookup as StaticLookup>::Source) {
+		fn kill_name(origin, target: <T::Lookup as StaticLookup>::Source) { // Lookup as StaticLookup is a preferred alternative to AccountId
 			T::ForceOrigin::ensure_origin(origin)?;
 
 			// Figure out who we're meant to be clearing.
-			let target = T::Lookup::lookup(target)?;
+			let target = T::Lookup::lookup(target)?; // something to lookup into accounts...
 			// Grab their deposit (and check that they have one).
 			let deposit = <NameOf<T>>::take(&target).ok_or(Error::<T>::Unnamed)?.1;
+/*
+fn slash_reserved(
+    who: &AccountId,
+    value: Self::Balance
+) -> (Self::NegativeImbalance, Self::Balance)
+Deducts up to value from reserved balance of who. This function cannot fail.*/
+// fn on_unbalanced(amount: Imbalance)
+// Handler for some imbalance. Infallible.
+
 			// Slash their deposit from them.
 			T::Slashed::on_unbalanced(T::Currency::slash_reserved(&target, deposit.clone()).0);
 
@@ -395,18 +409,28 @@ In this case it's like *
 		/// - One storage read/write.
 		/// - One event.
 		/// # </weight>
+		
+// Every dispatchable function is responsible for providing #[weight = $x] attribute.
 		#[weight = 70_000_000]
 		fn force_name(origin, target: <T::Lookup as StaticLookup>::Source, name: Vec<u8>) {
 			T::ForceOrigin::ensure_origin(origin)?;
 
 			let target = T::Lookup::lookup(target)?;
-			let deposit = <NameOf<T>>::get(&target).map(|x| x.1).unwrap_or_else(Zero::zero);
+// Maps a Result<T, E> to Result<U, E> by applying a function to a contained Ok value, leaving an Err value untouched.
+// so taking .1 (second element ?) and unwrap_or_else
+// unwrap_or_else: Returns the contained Ok value or computes it from a closure.
+			let deposit = <NameOf<T>>::get(&target).map(|x| x.1).unwrap_or_else(Zero::zero); // alternative version to what we've seen in the first fn
+													 // this chain will let pass the Err till unwrap. Unwrapp will
+													 // let pass the value into Ok or will return Zero instead.
 			<NameOf<T>>::insert(&target, (name, deposit));
 
 			Self::deposit_event(RawEvent::NameForced(target));
 		}
 	}
 }
+
+// The #[cfg(test)] annotation on the tests module tells Rust to compile and run the test 
+// code only when you run cargo test, not when you run cargo build
 
 #[cfg(test)]
 mod tests {
