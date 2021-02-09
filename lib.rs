@@ -428,12 +428,13 @@ Deducts up to value from reserved balance of who. This function cannot fail.*/
 		}
 	}
 }
-
+// Use mod to create new modules to encapsulate code, including other modules
 // The #[cfg(test)] annotation on the tests module tells Rust to compile and run the test 
 // code only when you run cargo test, not when you run cargo build
 
 #[cfg(test)]
 mod tests {
+// binding the eventually crates(? items generally speaking)
 	use super::*;
 
 	use frame_support::{
@@ -446,18 +447,27 @@ mod tests {
 		testing::Header, traits::{BlakeTwo256, IdentityLookup, BadOrigin},
 	};
 
+// To construct an Origin struct type for a runtime. This macro is typically called automatically 
+// by the construct_runtime! macro, but developers may call this macro directly to construct a mock 
+// runtime for testing that has a less complex structure than an actual runtime.
+
 	impl_outer_origin! {
+// Origin is implementing Test?
 		pub enum Origin for Test where system = frame_system {}
 	}
 
-	#[derive(Clone, Eq, PartialEq)]
+// the compiler is capable of providing basic implementations for some traits 
+// via the #[derive] attribute. These traits can still be manually implemented if a more complex behavior is required.
+	#[derive(Clone, Eq, PartialEq)] // Clone Eq PartialEq are traits atumatically implemented on Test struct
 	pub struct Test;
-	parameter_types! {
-		pub const BlockHashCount: u64 = 250;
+	parameter_types! { // set the configuration...
+		pub const BlockHashCount: u64 = 250; //const...
 		pub BlockWeights: frame_system::limits::BlockWeights =
-			frame_system::limits::BlockWeights::simple_max(1024);
+			frame_system::limits::BlockWeights::simple_max(1024); // just a variable of this type frame_system::limits::BlockWeights
+// frame_system::limits::BlockWeights::simple_max(1024) must be a function to return a data of that kind..
 	}
-	impl frame_system::Config for Test {
+	impl frame_system::Config for Test { // impementing frame_system::Config trait into the data Test which is the Origin for this test
+// aliases
 		type BaseCallFilter = ();
 		type BlockWeights = ();
 		type BlockLength = ();
@@ -485,11 +495,12 @@ mod tests {
 		pub const ExistentialDeposit: u64 = 1;
 	}
 	impl pallet_balances::Config for Test {
+// aliases
 		type MaxLocks = ();
 		type Balance = u64;
 		type Event = ();
 		type DustRemoval = ();
-		type ExistentialDeposit = ExistentialDeposit;
+		type ExistentialDeposit = ExistentialDeposit; // isnt it const u64 so? TODO controllare
 		type AccountStore = System;
 		type WeightInfo = ();
 	}
