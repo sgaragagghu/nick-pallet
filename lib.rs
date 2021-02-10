@@ -538,9 +538,10 @@ mod tests {
 				(2, 10),
 			],
 		}.assimilate_storage(&mut t).unwrap(); //adding these balances to the storage...
-		t.into()
+		t.into() // into converts t into a sp_io::TestExternalities, i guess
 	}
 
+// Test unit
 	#[test]
 	fn kill_name_should_work() {
 		new_test_ext().execute_with(|| { // probably append the follow instructions..
