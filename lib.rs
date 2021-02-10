@@ -494,7 +494,7 @@ mod tests {
 	parameter_types! {
 		pub const ExistentialDeposit: u64 = 1;
 	}
-	impl pallet_balances::Config for Test {
+	impl pallet_balances::Config for Test { //COnfig of pallet_balances!
 // aliases
 		type MaxLocks = ();
 		type Balance = u64;
@@ -509,10 +509,10 @@ mod tests {
 		pub const MinLength: usize = 3;
 		pub const MaxLength: usize = 16;
 	}
-	ord_parameter_types! {
+	ord_parameter_types! { //TODO understand what's this
 		pub const One: u64 = 1;
 	}
-	impl Config for Test {
+	impl Config for Test { //Config of this pallet!!
 		type Event = ();
 		type Currency = Balances;
 		type ReservationFee = ReservationFee;
@@ -525,24 +525,37 @@ mod tests {
 	type Balances = pallet_balances::Module<Test>;
 	type Nicks = Module<Test>;
 
-	fn new_test_ext() -> sp_io::TestExternalities {
-		let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
+	fn new_test_ext() -> sp_io::TestExternalities { // funzione per creare un dato di tipo sp_io::TestExternalities 
+							// Type alias for Externalities implementation used in tests.
+							// The Substrate externalities. Provides access to the storage and to other registered extensions.
+
+// mut-able variable, reference, or pointer
+		let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap(); // unwrap gives content of option 
+												     // return the inner element or panic
 		pallet_balances::GenesisConfig::<Test> {
 			balances: vec![
 				(1, 10),
 				(2, 10),
 			],
-		}.assimilate_storage(&mut t).unwrap();
+		}.assimilate_storage(&mut t).unwrap(); //adding these balances to the storage...
 		t.into()
 	}
 
 	#[test]
 	fn kill_name_should_work() {
-		new_test_ext().execute_with(|| {
-			assert_ok!(Nicks::set_name(Origin::signed(2), b"Dave".to_vec()));
-			assert_eq!(Balances::total_balance(&2), 10);
+		new_test_ext().execute_with(|| { // probably append the follow instructions..
+			// add the name for the second account..
+			assert_ok!(Nicks::set_name(Origin::signed(2), b"Dave".to_vec())); // return the value or invoke the panic! macro if the provided expression does not 
+											  // evaluate to Ok at runtime.
+			// check the balance, dereferencing a number, so a pointer to a const.. more or less
+			assert_eq!(Balances::total_balance(&2), 10);		// Asserts that two expressions are equal to each other (using PartialEq).
+										// On panic, this macro will print the values of the expressions 
+										// with their debug representations.
+			// kill the name
 			assert_ok!(Nicks::kill_name(Origin::signed(1), 2));
+			// check the balance after the stash
 			assert_eq!(Balances::total_balance(&2), 8);
+			// check the name is gone
 			assert_eq!(<NameOf<Test>>::get(2), None);
 		});
 	}
