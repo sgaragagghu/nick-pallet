@@ -564,21 +564,31 @@ mod tests {
 	#[test]
 	fn force_name_should_work() {
 		new_test_ext().execute_with(|| {
-			assert_noop!(
-				Nicks::set_name(Origin::signed(2), b"Dr. David Brubeck, III".to_vec()),
-				Error::<Test>::TooLong,
+// Evaluate an expression, assert it returns an expected Err value and that runtime storage has not been mutated (i.e. expression is a no-operation).
+// Used as assert_noop(expression_to_assert, expected_error_expression).
+
+			assert_noop!( // testing if too long is triggered
+				Nicks::set_name(Origin::signed(2), b"Dr. David Brubeck, III".to_vec()), // should fail
+				Error::<Test>::TooLong, // if it fails it`s right - it is expected
 			);
 
-			assert_ok!(Nicks::set_name(Origin::signed(2), b"Dave".to_vec()));
+			assert_ok!(Nicks::set_name(Origin::signed(2), b"Dave".to_vec())); // b"....." is a byte string aka normal ascii string
+											  // .to_vec convert it to a vector...
+											  // vec is contiguous growable array type, kinda an object..
+			// reserved balance of the second account should be 2 that`s the reservation for nick
 			assert_eq!(Balances::reserved_balance(2), 2);
+			// force name shuoldnt trigget too long
 			assert_ok!(Nicks::force_name(Origin::signed(1), 2, b"Dr. David Brubeck, III".to_vec()));
+			// balance should be the same as before
 			assert_eq!(Balances::reserved_balance(2), 2);
+			// nick shoul ve been setted
 			assert_eq!(<NameOf<Test>>::get(2).unwrap(), (b"Dr. David Brubeck, III".to_vec(), 2));
 		});
 	}
 
 	#[test]
 	fn normal_operation_should_work() {
+		// easy, nothing new
 		new_test_ext().execute_with(|| {
 			assert_ok!(Nicks::set_name(Origin::signed(1), b"Gav".to_vec()));
 			assert_eq!(Balances::reserved_balance(1), 2);
@@ -599,20 +609,27 @@ mod tests {
 	#[test]
 	fn error_catching_should_work() {
 		new_test_ext().execute_with(|| {
+			// should give error since nick has not been set
 			assert_noop!(Nicks::clear_name(Origin::signed(1)), Error::<Test>::Unnamed);
 
+			// again should fail
 			assert_noop!(
 				Nicks::set_name(Origin::signed(3), b"Dave".to_vec()),
 				pallet_balances::Error::<Test, _>::InsufficientBalance
 			);
 
+			// easy
 			assert_noop!(Nicks::set_name(Origin::signed(1), b"Ga".to_vec()), Error::<Test>::TooShort);
+			// again trying too long
 			assert_noop!(
 				Nicks::set_name(Origin::signed(1), b"Gavin James Wood, Esquire".to_vec()),
 				Error::<Test>::TooLong
 			);
+			// should work
 			assert_ok!(Nicks::set_name(Origin::signed(1), b"Dave".to_vec()));
+			// trying to kill name from a different account
 			assert_noop!(Nicks::kill_name(Origin::signed(2), 1), BadOrigin);
+			// trying to force name from a different account
 			assert_noop!(Nicks::force_name(Origin::signed(2), 1, b"Whatever".to_vec()), BadOrigin);
 		});
 	}
