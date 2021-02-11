@@ -231,6 +231,8 @@ decl_error! {
 // It combines the necessary logics using user-defined dispatchable calls into the two types (modules and types).
 
 decl_module! {
+// T: Config is a trait bound... 
+// So i guess we are declaring a struct called Module which takes a T that must implements Config trait...
 	/// Nicks module declaration.
 	pub struct Module<T: Config> for enum Call where origin: T::Origin { // probably this T wrap the call... so Origin is the caller basically...?
 		type Error = Error<T>; // alias. Error is a trait anyway
